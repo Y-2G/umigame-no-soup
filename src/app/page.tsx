@@ -1,95 +1,150 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
-export default function Home() {
+import {
+  Box,
+  Button,
+  ChakraProvider,
+  Flex,
+  Stack,
+  Textarea,
+} from "@chakra-ui/react";
+import axios from "axios";
+import { useEffect, useRef, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import useSWR from "swr";
+
+type Inputs = {
+  example: string;
+};
+
+type Text = {
+  from: "p" | "c";
+  value: string;
+};
+
+const OPEN_AI_API_URL = process.env.NEXT_PUBLIC_OPEN_API_URL;
+const OPEN_AI_API_KEY = process.env.NEXT_PUBLIC_OPEN_AI_API_KEY;
+const NOTION_API_KEY = process.env.NEXT_PUBLIC_NOTION_API_KEY;
+const NOTION_DATA_BASE_ID = process.env.NEXT_PUBLIC_NOTION_DATA_BASE_ID;
+const NOTION_VIEW_ID = process.env.NEXT_PUBLIC_NOTION_VIEW_ID;
+const NOTION_API_BASE_URL = process.env.NEXT_PUBLIC_NOTION_API_BASE_URL;
+
+type CommentProps = {
+  from: string;
+  value: string;
+};
+
+const Comment = ({ from, value }: CommentProps) => {
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <Flex gap={2} px={10} direction={from === "p" ? "row-reverse" : undefined}>
+      <Flex
+        w={10}
+        h={10}
+        justifyContent="center"
+        alignItems="center"
+        borderRadius="50%"
+        background={from === "p" ? "green.300" : "gray.300"}
+      >
+        {from}
+      </Flex>
+      <Box
+        px={4}
+        py={2}
+        w="100%"
+        borderRadius={6}
+        background={from === "p" ? "green.300" : "gray.300"}
+      >
+        {value}
+      </Box>
+    </Flex>
+  );
+};
+export default function Home() {
+  const { register, handleSubmit } = useForm<Inputs>();
+  const [text, setText] = useState<Text[]>([]);
+  const notionApiUrl = `${NOTION_API_BASE_URL}/${NOTION_DATA_BASE_ID}`;
+  console.log(NOTION_API_BASE_URL, NOTION_DATA_BASE_ID);
+  const fetcher = async () => {
+    return await axios.get(notionApiUrl, {
+      headers: {
+        Authorization: `Bearer ${NOTION_API_KEY}`,
+        "Notion-Version": "2022-06-28",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  };
+  const { data } = useSWR(notionApiUrl, fetcher);
+  console.log(notionApiUrl, data);
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    try {
+      // const response = await axios.post(
+      //   URL,
+      //   {
+      //     model: "gpt-3.5-turbo",
+      //     messages: [{ role: "user", content: data.example }],
+      //   },
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       Authorization: `Bearer ${OPEN_AI_API_KEY}`,
+      //     },
+      //   }
+      // );
+      // const chatgpt_response = response.data.choices[0].message.content;
+      // console.log(chatgpt_response);
+      setText([
+        ...text,
+        { from: "p", value: data.example },
+        { from: "c", value: "c" },
+      ]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  };
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+  useEffect(() => {
+    const observer = new MutationObserver(scrollToBottom);
+    if (scrollRef.current) {
+      observer.observe(scrollRef.current, { childList: true });
+    }
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
+  return (
+    <ChakraProvider>
+      <Box h="100%">
+        <Box h="calc(100% - 80px)">
+          <Stack ref={scrollRef} h="100%" overflow="scroll" p={5}>
+            {text?.map((t, i) => (
+              <Comment key={i} from={t.from} value={t.value} />
+            ))}
+          </Stack>
+        </Box>
+        <Box
+          w="100%"
+          h="80px"
+          px={10}
+          py={5}
+          position="fixed"
+          bottom="0"
+          background="#fff"
         >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Flex gap={5}>
+              <Textarea rows={1} {...register("example")} />
+              <Button type="submit">送信</Button>
+            </Flex>
+          </form>
+        </Box>
+      </Box>
+    </ChakraProvider>
   );
 }
