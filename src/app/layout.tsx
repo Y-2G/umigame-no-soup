@@ -26,9 +26,7 @@ export default function RootLayout({
       <body style={{ height: "100%" }}>
         <ChakraProvider>
           <QuestionContext.Provider value={{ question, setQuestion }}>
-            <main style={{ height: "100%" }}>
-              <Box p={5}>{children}</Box>
-            </main>
+            <main style={{ height: "100%" }}>{children}</main>
           </QuestionContext.Provider>
         </ChakraProvider>
       </body>

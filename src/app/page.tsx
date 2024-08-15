@@ -1,128 +1,43 @@
 "use client";
 
-import { Box, Button, Flex, Stack, Textarea } from "@chakra-ui/react";
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import React, { useContext } from "react";
 import useSWR from "swr";
+import { Box, LinkBox, Stack } from "@chakra-ui/react";
+import { NotionQuestionResponce, Question } from "@/types/question";
+import Link from "next/link";
+import { QuestionContext } from "./layout";
 
-type Inputs = {
-  example: string;
-};
-
-type Text = {
-  from: "p" | "c";
-  value: string;
-};
-
-const OPEN_AI_API_URL = process.env.NEXT_PUBLIC_OPEN_API_URL;
-const OPEN_AI_API_KEY = process.env.NEXT_PUBLIC_OPEN_AI_API_KEY;
-const NOTION_API_KEY = process.env.NEXT_PUBLIC_NOTION_API_KEY;
-const NOTION_DATA_BASE_ID = process.env.NEXT_PUBLIC_NOTION_DATA_BASE_ID;
-const NOTION_VIEW_ID = process.env.NEXT_PUBLIC_NOTION_VIEW_ID;
-const NOTION_API_BASE_URL = process.env.NEXT_PUBLIC_NOTION_API_BASE_URL;
-
-type CommentProps = {
-  from: string;
-  value: string;
-};
-
-const Comment = ({ from, value }: CommentProps) => {
-  return (
-    <Flex gap={2} px={10} direction={from === "p" ? "row-reverse" : undefined}>
-      <Flex
-        w={10}
-        h={10}
-        justifyContent="center"
-        alignItems="center"
-        borderRadius="50%"
-        background={from === "p" ? "green.300" : "gray.300"}
-      >
-        {from}
-      </Flex>
-      <Box
-        px={4}
-        py={2}
-        w="100%"
-        rounded="md"
-        background={from === "p" ? "green.300" : "gray.300"}
-      >
-        {value}
-      </Box>
-    </Flex>
-  );
-};
-export default function Home() {
-  const { register, handleSubmit } = useForm<Inputs>();
-  const [text, setText] = useState<Text[]>([]);
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    try {
-      // const response = await axios.post(
-      //   URL,
-      //   {
-      //     model: "gpt-3.5-turbo",
-      //     messages: [{ role: "user", content: data.example }],
-      //   },
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Authorization: `Bearer ${OPEN_AI_API_KEY}`,
-      //     },
-      //   }
-      // );
-      // const chatgpt_response = response.data.choices[0].message.content;
-      // console.log(chatgpt_response);
-      setText([
-        ...text,
-        { from: "p", value: data.example },
-        { from: "c", value: "c" },
-      ]);
-    } catch (error) {
-      console.log(error);
-    }
+export default function Select() {
+  const url = `/api/notion`;
+  const fetcher = async () => {
+    const res = await axios.get<NotionQuestionResponce>(url);
+    return res.data;
   };
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollToBottom = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+  const { data } = useSWR(url, fetcher);
+
+  const { setQuestion } = useContext(QuestionContext);
+  const onClick = (question: Question) => {
+    setQuestion({ ...question });
   };
 
-  useEffect(() => {
-    const observer = new MutationObserver(scrollToBottom);
-    if (scrollRef.current) {
-      observer.observe(scrollRef.current, { childList: true });
-    }
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
   return (
-    <Box h="100%">
-      <Box h="calc(100% - 80px)">
-        <Stack ref={scrollRef} h="100%" overflow="scroll" p={5}>
-          {text?.map((t, i) => (
-            <Comment key={i} from={t.from} value={t.value} />
-          ))}
-        </Stack>
-      </Box>
-      <Box
-        w="100%"
-        h="80px"
-        px={10}
-        py={5}
-        position="fixed"
-        bottom="0"
-        background="#fff"
-      >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Flex gap={5}>
-            <Textarea rows={1} {...register("example")} />
-            <Button type="submit">送信</Button>
-          </Flex>
-        </form>
-      </Box>
-    </Box>
+    <Stack px={10} py={5}>
+      {data?.map((e, i) => (
+        <LinkBox
+          key={i}
+          as="article"
+          px={4}
+          py={2}
+          borderWidth="1px"
+          rounded="md"
+          onClick={() => onClick(e)}
+        >
+          <Link href={`/question/${e.id}`}>
+            <Box>{`title: ${e.title}`}</Box>
+          </Link>
+        </LinkBox>
+      ))}
+    </Stack>
   );
 }
