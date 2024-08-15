@@ -1,10 +1,11 @@
+import { NOTION_API_KEY, NOTION_DATA_BASE_ID } from "@/constants";
 import { NotionQuestionResponce } from "@/types/question";
 import { Client } from "@notionhq/client";
 import { NextResponse } from "next/server";
 
 // Notion APIのクライアントを作成
 export const notion = new Client({
-  auth: process.env.NEXT_PUBLIC_NOTION_API_KEY,
+  auth: NOTION_API_KEY,
 });
 
 const corsHeaders = {
@@ -16,8 +17,7 @@ const corsHeaders = {
 
 export async function GET() {
   try {
-    const databaseId =
-      process.env.NEXT_PUBLIC_NOTION_DATA_BASE_ID || "DEFAULT_DATABASE_ID";
+    const databaseId = NOTION_DATA_BASE_ID || "";
     const notionResponse = await notion.databases.query({
       database_id: databaseId,
     });
