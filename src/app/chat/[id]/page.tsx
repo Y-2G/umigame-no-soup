@@ -1,12 +1,12 @@
 "use client";
 
-import { Chat } from "@/components/chat";
-import { useQuestion } from "@/hooks/useQuestion";
+import { Message } from "@/components/message";
+import { useMessage } from "@/hooks/useMessage";
 import { Box, Button, Flex, Stack, Textarea } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
 
-export default function Question() {
-  const { text, question, methods, onSubmit } = useQuestion();
+export default function Chat() {
+  const { methods, messages, question, onSubmit } = useMessage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => {
     if (scrollRef.current) {
@@ -27,11 +27,13 @@ export default function Question() {
   return (
     <Box h="100%">
       <Box h="80px" position="fixed" top={0} px={10} py={2} background="#fff">
-        {question?.data?.description}
+        {question?.description}
       </Box>
       <Box h="calc(100% - 80px)" pt="80px">
         <Stack ref={scrollRef} h="100%" overflow="scroll">
-          {text?.map((t, i) => <Chat key={i} from={t.from} value={t.value} />)}
+          {messages?.map((t, i) => (
+            <Message key={i} from={t.from} value={t.value} />
+          ))}
         </Stack>
       </Box>
       <Box
@@ -45,7 +47,7 @@ export default function Question() {
       >
         <form onSubmit={methods.handleSubmit(onSubmit)}>
           <Flex gap={5}>
-            <Textarea rows={1} {...methods.register("question")} />
+            <Textarea rows={1} {...methods.register("message")} />
             <Button type="submit">送信</Button>
           </Flex>
         </form>

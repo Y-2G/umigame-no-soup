@@ -1,81 +1,28 @@
+import { useEffect, useState } from "react";
+import { db } from "../../firebaseConfig";
+import { query, collection, orderBy, onSnapshot } from "firebase/firestore";
+import { useQueryClient } from "@tanstack/react-query";
 import { Question } from "@/types/question";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-
-type Inputs = {
-  question: string;
-};
-
-type Text = {
-  from: "p" | "c";
-  value: string;
-};
 
 export const useQuestion = () => {
-  const methods = useForm<Inputs>();
+  const [questions, setQuestions] = useState<any[]>([]);
   const queryClient = useQueryClient();
-  const question = queryClient.getQueryState<Question>(["select-quesiton"]);
-  console.log(question?.data);
-  const [text, setText] = useState<Text[]>([]);
-
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    const prompt = `
-  ## 前提
-  あなたと私は「水平思考推理ゲーム」を行っています。
-  出題者が提示する謎めいたシナリオに対し、解答者が「はい」か「いいえ」で答えられる質問をして、
-  シナリオの真相を推理するゲームです。
-  解答者は質問を繰り返しながら、出題者から得た情報をもとに真相を解明します。
-  あなたは出題者で私が解答者です。
-  
-  ## ポイント
-  質問に対して「はい」か「いいえ」で回答してください。
-  質問が「はい」か「いいえ」に絞れない場合、「はい か いいえ で答えることができません」と回答してください。
-  質問内容がシナリオから推測できない場合、「わかりません」と回答してください。
-  
-  ## シナリオ
-  ${question?.data?.description}
-  
-  ## 模範解答
-  ${question?.data?.answer}
-  
-  ## 質問
-  ${data.question}
-  `;
-
-    try {
-      // const response = await axios.post(
-      //   URL,
-      //   {
-      //     model: "gpt-3.5-turbo",
-      //     messages: [{ role: "user", content: data.example }],
-      //   },
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Authorization: `Bearer ${OPEN_AI_API_KEY}`,
-      //     },
-      //   }
-      // );
-      // const chatgpt_response = response.data.choices[0].message.content;
-      // console.log(chatgpt_response);
-      console.log(prompt);
-      setText([
-        ...text,
-        { from: "p", value: data.question },
-        { from: "c", value: "c" },
-      ]);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      methods.reset();
-    }
+  const handleClick = (question: Question) => {
+    queryClient.setQueryData<Question>(["select-quesiton"], { ...question });
   };
+  useEffect(() => {
+    const q = query(collection(db, "question"), orderBy("createdAt"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const questions = querySnapshot.docs.map((doc) => {
+        return { ...doc.data(), id: doc.id };
+      });
+      setQuestions(questions);
+    });
+    return () => unsubscribe();
+  }, []);
 
   return {
-    text,
-    question,
-    methods,
-    onSubmit,
+    questions,
+    handleClick,
   };
 };

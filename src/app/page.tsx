@@ -1,30 +1,15 @@
 "use client";
 
-import axios from "axios";
 import React from "react";
-import { Box, LinkBox, Stack } from "@chakra-ui/react";
-import { NotionQuestionResponce, Question } from "@/types/question";
 import Link from "next/link";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Box, LinkBox, Stack } from "@chakra-ui/react";
+import { useQuestion } from "@/hooks/useQuestion";
 
 export default function Select() {
-  const getQuestion = async () => {
-    const res = await axios.get<NotionQuestionResponce>(`/api/notion`);
-    return res.data;
-  };
-  const { data } = useQuery({
-    queryKey: ["get-question"],
-    queryFn: getQuestion,
-  });
-
-  const queryClient = useQueryClient();
-  const handleClick = (question: Question) => {
-    queryClient.setQueryData<Question>(["select-quesiton"], { ...question });
-  };
-
+  const { questions, handleClick } = useQuestion();
   return (
     <Stack px={10} py={5}>
-      {data?.map((e, i) => (
+      {questions.map((e, i) => (
         <LinkBox
           key={i}
           as="article"
@@ -34,7 +19,7 @@ export default function Select() {
           rounded="md"
           onClick={() => handleClick(e)}
         >
-          <Link href={`/question/${e.id}`}>
+          <Link href={`/chat/${e.id}`}>
             <Box>{`title: ${e.title}`}</Box>
           </Link>
         </LinkBox>

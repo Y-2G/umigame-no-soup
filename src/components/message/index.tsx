@@ -5,7 +5,7 @@ type Props = {
   value: string;
 };
 
-export const Chat = ({ from, value }: Props) => {
+export const Message = ({ from, value }: Props) => {
   return (
     <Flex gap={2} px={10} direction={from === "p" ? "row-reverse" : undefined}>
       <Flex
