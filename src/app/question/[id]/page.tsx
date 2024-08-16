@@ -27,7 +27,7 @@ export default function Question() {
   return (
     <Box h="100%">
       <Box h="80px" position="fixed" top={0} px={10} py={2} background="#fff">
-        {question?.description}
+        {question?.data?.description}
       </Box>
       <Box h="calc(100% - 80px)" pt="80px">
         <Stack ref={scrollRef} h="100%" overflow="scroll">

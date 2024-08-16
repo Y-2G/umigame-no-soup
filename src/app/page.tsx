@@ -1,24 +1,25 @@
 "use client";
 
 import axios from "axios";
-import React, { useContext } from "react";
-import useSWR from "swr";
+import React from "react";
 import { Box, LinkBox, Stack } from "@chakra-ui/react";
 import { NotionQuestionResponce, Question } from "@/types/question";
 import Link from "next/link";
-import { QuestionContext } from "./layout";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function Select() {
-  const url = `/api/notion`;
-  const fetcher = async () => {
-    const res = await axios.get<NotionQuestionResponce>(url);
+  const getQuestion = async () => {
+    const res = await axios.get<NotionQuestionResponce>(`/api/notion`);
     return res.data;
   };
-  const { data } = useSWR(url, fetcher);
+  const { data } = useQuery({
+    queryKey: ["get-question"],
+    queryFn: getQuestion,
+  });
 
-  const { setQuestion } = useContext(QuestionContext);
-  const onClick = (question: Question) => {
-    setQuestion({ ...question });
+  const queryClient = useQueryClient();
+  const handleClick = (question: Question) => {
+    queryClient.setQueryData<Question>(["select-quesiton"], { ...question });
   };
 
   return (
@@ -31,7 +32,7 @@ export default function Select() {
           py={2}
           borderWidth="1px"
           rounded="md"
-          onClick={() => onClick(e)}
+          onClick={() => handleClick(e)}
         >
           <Link href={`/question/${e.id}`}>
             <Box>{`title: ${e.title}`}</Box>

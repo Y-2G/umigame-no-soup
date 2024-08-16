@@ -1,5 +1,6 @@
-import { QuestionContext } from "@/app/layout";
-import { useState, useContext } from "react";
+import { Question } from "@/types/question";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 type Inputs = {
@@ -13,9 +14,10 @@ type Text = {
 
 export const useQuestion = () => {
   const methods = useForm<Inputs>();
+  const queryClient = useQueryClient();
+  const question = queryClient.getQueryState<Question>(["select-quesiton"]);
+  console.log(question?.data);
   const [text, setText] = useState<Text[]>([]);
-
-  const { question } = useContext(QuestionContext);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     const prompt = `
@@ -32,10 +34,10 @@ export const useQuestion = () => {
   質問内容がシナリオから推測できない場合、「わかりません」と回答してください。
   
   ## シナリオ
-  ${question?.description}
+  ${question?.data?.description}
   
   ## 模範解答
-  ${question?.answer}
+  ${question?.data?.answer}
   
   ## 質問
   ${data.question}

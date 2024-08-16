@@ -1,33 +1,48 @@
 "use client";
 
-import { Question } from "@/types/question";
-import { Box, ChakraProvider } from "@chakra-ui/react";
-import { Dispatch, SetStateAction, createContext, useState } from "react";
+import { ChakraProvider } from "@chakra-ui/react";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  persistQueryClient,
+  PersistQueryClientProvider,
+  persistQueryClientSave,
+} from "@tanstack/react-query-persist-client";
+import { useEffect } from "react";
 
-const defaultQuestionValue: QuestionContextType = {
-  question: null,
-  setQuestion: () => {},
-};
-type QuestionContextType = {
-  question: Question | null;
-  setQuestion: Dispatch<SetStateAction<Question | null>>;
-};
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+    },
+  },
+});
 
-export const QuestionContext = createContext(defaultQuestionValue);
+const persister = createSyncStoragePersister({
+  throttleTime: 3000,
+  storage: globalThis.localStorage,
+});
+
+persistQueryClient({
+  queryClient,
+  persister,
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [question, setQuestion] = useState<Question | null>(null);
-
   return (
     <html lang="en" style={{ height: "100%" }}>
       <body style={{ height: "100%" }}>
         <ChakraProvider>
-          <QuestionContext.Provider value={{ question, setQuestion }}>
+          <PersistQueryClientProvider
+            client={queryClient}
+            persistOptions={{ persister }}
+          >
             <main style={{ height: "100%" }}>{children}</main>
-          </QuestionContext.Provider>
+          </PersistQueryClientProvider>
         </ChakraProvider>
       </body>
     </html>
