@@ -10,14 +10,18 @@ import { db } from "../../firebaseConfig";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Question } from "@/types/question";
+import { BASE_PROMPT, OPEN_AI_API_KEY, OPEN_AI_API_URL } from "@/constants";
+import axios from "axios";
 
 type Inputs = {
-  message: string;
+  text: string;
 };
 
 type Message = {
   text: string;
-  from: "p" | "c";
+  from?: "player" | "computer";
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export const useMessage = () => {
@@ -26,68 +30,73 @@ export const useMessage = () => {
   const queryClient = useQueryClient();
   const question = queryClient.getQueryData<Question>(["select-quesiton"]);
 
+  const store = async (data: Message) => {
+    await addDoc(collection(db, "message"), data);
+    setMessages([...messages, data]);
+  };
+
+  const storePlayerMessage = async (data: Message) => {
+    await store({ ...data, from: "player" });
+  };
+
+  const storeChatGptMessage = async (data: Message) => {
+    const prompt = `
+    ${BASE_PROMPT}
+    ## シナリオ
+    ${question?.description}
+    ## 模範解答
+    ${question?.answer}
+    ## 質問
+    ${data.text}
+    `;
+
+    const response = await axios.post(
+      OPEN_AI_API_URL || "",
+      {
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPEN_AI_API_KEY}`,
+        },
+      }
+    );
+    const text = response.data.choices[0].message.content;
+
+    await store({ ...data, text, from: "computer" });
+  };
+
+  const onSubmit: SubmitHandler<Inputs> = async ({ text }: Inputs) => {
+    if (!text) {
+      return;
+    }
+    try {
+      const data = {
+        text,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await storePlayerMessage(data);
+      await storeChatGptMessage(data);
+    } catch (error) {
+      console.log(error);
+    }
+    methods.reset();
+  };
+
   useEffect(() => {
     const q = query(collection(db, "message"), orderBy("createdAt"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const messagesArray = querySnapshot.docs.map((doc) => {
-        return { ...doc.data(), id: doc.id };
+      const messages = querySnapshot.docs.map((doc) => {
+        const { text, from, createdAt, updatedAt } = doc.data();
+        return { id: doc.id, text, from, createdAt, updatedAt };
       });
-      setMessages(messagesArray);
+      setMessages(messages);
     });
     return () => unsubscribe();
   }, []);
-
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    // const prompt = `
-    // ## 前提
-    // あなたと私は「水平思考推理ゲーム」を行っています。
-    // 出題者が提示する謎めいたシナリオに対し、解答者が「はい」か「いいえ」で答えられる質問をして、
-    // シナリオの真相を推理するゲームです。
-    // 解答者は質問を繰り返しながら、出題者から得た情報をもとに真相を解明します。
-    // あなたは出題者で私が解答者です。
-
-    // ## ポイント
-    // 質問に対して「はい」か「いいえ」で回答してください。
-    // 質問が「はい」か「いいえ」に絞れない場合、「はい か いいえ で答えることができません」と回答してください。
-    // 質問内容がシナリオから推測できない場合、「わかりません」と回答してください。
-
-    // ## シナリオ
-
-    // ## 模範解答
-
-    // ## 質問
-    // ${data.message}
-    // `;
-
-    // try {
-    //   const response = await axios.post(
-    //     URL,
-    //     {
-    //       model: "gpt-3.5-turbo",
-    //       messages: [{ role: "user", content: data.example }],
-    //     },
-    //     {
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         Authorization: `Bearer ${OPEN_AI_API_KEY}`,
-    //       },
-    //     }
-    //   );
-    //   const chatgpt_response = response.data.choices[0].message.content;
-    //   console.log(chatgpt_response);
-    //   console.log(prompt);
-    // } catch (error) {
-    //   console.log(error);
-    // }
-
-    if (data.message !== "") {
-      await addDoc(collection(db, "message"), {
-        text: data.message,
-        createdAt: new Date(),
-      });
-      methods.reset();
-    }
-  };
 
   return {
     methods,

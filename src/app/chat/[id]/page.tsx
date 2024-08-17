@@ -31,8 +31,8 @@ export default function Chat() {
       </Box>
       <Box h="calc(100% - 80px)" pt="80px">
         <Stack ref={scrollRef} h="100%" overflow="scroll">
-          {messages?.map((t, i) => (
-            <Message key={i} from={t.from} value={t.value} />
+          {messages?.map((message, i) => (
+            <Message key={i} from={message.from} text={message.text} />
           ))}
         </Stack>
       </Box>
@@ -47,7 +47,7 @@ export default function Chat() {
       >
         <form onSubmit={methods.handleSubmit(onSubmit)}>
           <Flex gap={5}>
-            <Textarea rows={1} {...methods.register("message")} />
+            <Textarea rows={1} {...methods.register("text")} />
             <Button type="submit">送信</Button>
           </Flex>
         </form>
