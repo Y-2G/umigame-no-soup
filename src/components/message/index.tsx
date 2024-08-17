@@ -1,8 +1,8 @@
 import { Flex, Box } from "@chakra-ui/react";
 
 type Props = {
-  from: string;
   text: string;
+  from?: string;
 };
 
 export const Message = ({ from, text }: Props) => {

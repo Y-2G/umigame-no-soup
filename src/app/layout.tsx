@@ -15,14 +15,14 @@ const queryClient = new QueryClient({
   },
 });
 
-const persister = createSyncStoragePersister({
-  storage: globalThis.localStorage,
-});
+// const persister = createSyncStoragePersister({
+//   storage: globalThis.localStorage,
+// });
 
-persistQueryClient({
-  queryClient,
-  persister,
-});
+// persistQueryClient({
+//   queryClient,
+//   persister,
+// });
 
 export default function RootLayout({
   children,
@@ -31,10 +31,11 @@ export default function RootLayout({
 }>) {
   const { user } = useAuth();
   const router = useRouter();
-  console.log(user);
+
   if (user === null) {
     router.push("/auth");
   }
+
   return (
     <html lang="en" style={{ height: "100%" }}>
       <body style={{ height: "100%" }}>
