@@ -5,7 +5,7 @@ type Props = {
   from?: string;
 };
 
-export const Message = ({ from, text }: Props) => {
+export const ChatMessage = ({ from, text }: Props) => {
   return (
     <Flex
       gap={2}

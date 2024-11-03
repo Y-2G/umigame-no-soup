@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Box, LinkBox, Stack } from "@chakra-ui/react";
 import { useQuestion } from "@/hooks/useQuestion";
 
-export default function HomePage() {
+export default function Select() {
   const { questions, handleClick } = useQuestion();
   return (
     <Stack px={10} py={5}>
