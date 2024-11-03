@@ -1,7 +1,7 @@
 import { ChatMessageType } from "@/types/question";
 import { Stack } from "@chakra-ui/react";
 import { ForwardedRef, forwardRef } from "react";
-import { ChatMessage } from "../chatMessage";
+import { ChatMessage } from "@/components/chat/chatMessage";
 
 type ChatMessagesProps = {
   messages?: ChatMessageType[];

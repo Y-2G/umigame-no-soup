@@ -5,7 +5,7 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
-import { db } from "../../../firebaseConfig";
+import { db } from "#/firebaseConfig";
 
 export default async function handler(req: any, res: any) {
   if (req.method === "GET") {

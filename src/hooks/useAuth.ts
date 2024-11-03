@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { auth } from "../../firebaseConfig";
+import { auth } from "#/firebaseConfig";
 import { signInAnonymously } from "firebase/auth";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { useRouter } from "next/navigation";

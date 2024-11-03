@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { db } from "../../firebaseConfig";
+import { db } from "#/firebaseConfig";
 import { query, collection, orderBy, onSnapshot } from "firebase/firestore";
 import { useQueryClient } from "@tanstack/react-query";
-import { Question } from "@/types/question";
+import { QuestionType } from "@/types/question";
 
 export const useQuestion = () => {
   const [questions, setQuestions] = useState<any[]>([]);
   const queryClient = useQueryClient();
-  const handleClick = (question: Question) => {
-    queryClient.setQueryData<Question>(["select-quesiton"], { ...question });
+  const handleClick = (question: QuestionType) => {
+    queryClient.setQueryData<QuestionType>(["select-quesiton"], {
+      ...question,
+    });
   };
   useEffect(() => {
     const q = query(collection(db, "question"), orderBy("createdAt"));
