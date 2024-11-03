@@ -8,6 +8,8 @@ import {
 } from "@/types/question";
 import { BASE_PROMPT, OPEN_AI_API_KEY, OPEN_AI_API_URL } from "@/constants";
 import axios from "axios";
+import { db } from "#/firebaseConfig";
+import { query, collection, orderBy, getDocs } from "firebase/firestore";
 
 export const useMessage = () => {
   const methods = useForm<ChatInputType>();
@@ -15,11 +17,12 @@ export const useMessage = () => {
   const question = queryClient.getQueryData<QuestionType>(["select-quesiton"]);
 
   const getMessage = async () => {
-    const res = await axios.get(`/api/firebase`);
-    return res.data;
+    const q = query(collection(db, "message"), orderBy("createdAt"));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   };
 
-  const { data } = useQuery<ChatMessageType[]>({
+  const messages = useQuery<any>({
     queryKey: ["get-messsage"],
     queryFn: getMessage,
   });
@@ -92,9 +95,8 @@ ${text}
 
   return {
     methods,
-    messages: data,
+    messages: messages.data,
     question,
-    isFetching: queryClient.isFetching({ queryKey: ["select-quesiton"] }),
     onSubmit,
   };
 };

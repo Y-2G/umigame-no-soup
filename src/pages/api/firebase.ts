@@ -6,8 +6,9 @@ import {
   query,
 } from "firebase/firestore";
 import { db } from "#/firebaseConfig";
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     try {
       const q = query(collection(db, "message"), orderBy("createdAt"));
