@@ -26,10 +26,17 @@ export default function Chat() {
 
   return (
     <Box h="100%">
-      <Box h="80px" position="fixed" top={0} px={10} py={2} background="#fff">
+      <Box
+        h="80px"
+        position="fixed"
+        top={0}
+        px={10}
+        py={2}
+        background="#cdcdcd"
+      >
         {question?.description}
       </Box>
-      <Box h="calc(100% - 80px)" pt="80px">
+      <Box h="calc(100% - 80px)" pt="90px">
         <Stack ref={scrollRef} h="100%" overflow="scroll">
           {messages?.map((message, i) => (
             <Message key={i} from={message.from} text={message.text} />

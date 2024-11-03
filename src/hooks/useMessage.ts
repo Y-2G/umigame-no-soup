@@ -10,9 +10,11 @@ type Inputs = {
   text: string;
 };
 
+type MessageFrom = "player" | "computer";
+
 type Message = {
   text: string;
-  from?: "player" | "computer";
+  from: MessageFrom;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -36,7 +38,7 @@ export const useMessage = () => {
   };
 
   const mutationMessage = useMutation({
-    mutationFn: (data: Message) => postMessage(data),
+    mutationFn: async (data: Message) => await postMessage(data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["get-messsage"],
@@ -44,11 +46,16 @@ export const useMessage = () => {
     },
   });
 
-  const storePlayerMessage = async (data: Message) => {
-    mutationMessage.mutate({ ...data, from: "player" });
+  const storeMessage = async (text: string, from: MessageFrom) => {
+    mutationMessage.mutate({
+      text,
+      from,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
   };
 
-  const storeChatGptMessage = async (data: Message) => {
+  const getChatGptMessage = async (text: string) => {
     const prompt = `
 ${BASE_PROMPT}
 ## シナリオ
@@ -56,7 +63,7 @@ ${question?.description}
 ## 模範解答
 ${question?.answer}
 ## 質問
-${data.text}
+${text}
 `;
 
     const response = await axios.post(
@@ -72,24 +79,23 @@ ${data.text}
         },
       }
     );
-    console.log(prompt);
-    const text = response.data.choices[0].message.content;
-    mutationMessage.mutate({ ...data, text, from: "computer" });
+
+    console.log(response.data.choices[0].message.content);
+    return response.data.choices[0].message.content;
   };
 
-  const onSubmit: SubmitHandler<Inputs> = async ({ text }: Inputs) => {
-    if (!text) {
+  const onSubmit: SubmitHandler<Inputs> = async ({
+    text: playerText,
+  }: Inputs) => {
+    if (!playerText) {
       return;
     }
     try {
-      const now = new Date();
-      const data = { text, createdAt: now, updatedAt: now };
-      await storePlayerMessage(data);
-      setTimeout(async () => {
-        await storeChatGptMessage(data);
-      }, 300);
+      await storeMessage(playerText, "player");
+      const computerText = await getChatGptMessage(playerText);
+      await storeMessage(computerText, "computer");
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
     methods.reset();
   };

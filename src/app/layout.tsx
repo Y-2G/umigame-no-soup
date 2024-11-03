@@ -15,14 +15,14 @@ const queryClient = new QueryClient({
   },
 });
 
-// const persister = createSyncStoragePersister({
-//   storage: globalThis.localStorage,
-// });
+const persister = createSyncStoragePersister({
+  storage: globalThis.localStorage,
+});
 
-// persistQueryClient({
-//   queryClient,
-//   persister,
-// });
+persistQueryClient({
+  queryClient,
+  persister,
+});
 
 export default function RootLayout({
   children,
