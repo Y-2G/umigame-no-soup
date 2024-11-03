@@ -1,5 +1,3 @@
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Question } from "@/types/question";

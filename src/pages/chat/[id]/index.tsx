@@ -27,6 +27,7 @@ export default function Chat() {
   return (
     <Box h="100%">
       <Box
+        w="100%"
         h="80px"
         position="fixed"
         top={0}
@@ -34,7 +35,7 @@ export default function Chat() {
         py={2}
         background="#cdcdcd"
       >
-        {question?.description}
+        {question?.description ?? ""}
       </Box>
       <Box h="calc(100% - 80px)" pt="90px">
         <Stack ref={scrollRef} h="100%" overflow="scroll">

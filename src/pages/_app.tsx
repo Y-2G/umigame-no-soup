@@ -5,6 +5,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
+import { AppProps } from "next/app";
 import { useRouter } from "next/navigation";
 
 const queryClient = new QueryClient({
@@ -24,27 +25,19 @@ persistQueryClient({
   persister,
 });
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const { user } = useAuth();
-  const router = useRouter();
+export default function App({ Component, pageProps }: AppProps) {
+  // const { user } = useAuth();
+  // const router = useRouter();
 
-  if (user === null) {
-    router.push("/auth");
-  }
+  // if (user === null) {
+  //   router.push("/auth");
+  // }
 
   return (
-    <html lang="en" style={{ height: "100%" }}>
-      <body style={{ height: "100%" }}>
-        <ChakraProvider>
-          <QueryClientProvider client={queryClient}>
-            <main style={{ height: "100%" }}>{children}</main>
-          </QueryClientProvider>
-        </ChakraProvider>
-      </body>
-    </html>
+    <ChakraProvider>
+      <QueryClientProvider client={queryClient}>
+        <Component {...pageProps} />
+      </QueryClientProvider>
+    </ChakraProvider>
   );
 }
