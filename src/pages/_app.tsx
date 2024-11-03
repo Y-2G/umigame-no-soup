@@ -1,7 +1,5 @@
-"use client";
-
 import { useAuth } from "@/hooks/useAuth";
-import { ChakraProvider } from "@chakra-ui/react";
+import { Provider as ChakraProvider } from "@/components/ui/provider";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
@@ -26,12 +24,12 @@ persistQueryClient({
 });
 
 export default function App({ Component, pageProps }: AppProps) {
-  // const { user } = useAuth();
-  // const router = useRouter();
+  const { user } = useAuth();
+  const router = useRouter();
 
-  // if (user === null) {
-  //   router.push("/auth");
-  // }
+  if (user === null) {
+    router.push("/auth");
+  }
 
   return (
     <ChakraProvider>

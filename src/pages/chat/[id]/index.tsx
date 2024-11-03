@@ -1,9 +1,45 @@
-"use client";
-
 import { Message } from "@/components/message";
 import { useMessage } from "@/hooks/useMessage";
-import { Box, Button, Flex, Stack, Textarea } from "@chakra-ui/react";
-import { useEffect, useRef } from "react";
+import { ChatMessageType, QuestionType } from "@/types/question";
+import {
+  Box,
+  Button,
+  Flex,
+  Stack,
+  Textarea,
+  Text,
+  ClientOnly,
+  Skeleton,
+} from "@chakra-ui/react";
+import { ForwardedRef, forwardRef, useEffect, useRef } from "react";
+
+const QuestionDescription = ({ question }: { question?: QuestionType }) => {
+  if (!question?.description) {
+    throw new Promise(() => {}); // Suspenseを待機状態にする
+  }
+  return <Text>{question.description}</Text>;
+};
+
+type QuestionMessagesProps = {
+  messages?: ChatMessageType[];
+};
+
+const QuestionMessages = forwardRef(
+  ({ messages }: QuestionMessagesProps, ref: ForwardedRef<HTMLDivElement>) => {
+    if (!messages) {
+      throw new Promise(() => {}); // Suspenseを待機状態にする
+    }
+    return (
+      <Stack ref={ref} h="100%" overflow="scroll">
+        {messages?.map((message, i) => (
+          <Message key={i} from={message.from} text={message.text} />
+        ))}
+      </Stack>
+    );
+  }
+);
+
+QuestionMessages.displayName = "QuestionMessages";
 
 export default function Chat() {
   const { methods, messages, question, onSubmit } = useMessage();
@@ -35,14 +71,14 @@ export default function Chat() {
         py={2}
         background="#cdcdcd"
       >
-        {question?.description ?? ""}
+        <ClientOnly fallback={<Skeleton />}>
+          <QuestionDescription question={question} />
+        </ClientOnly>
       </Box>
       <Box h="calc(100% - 80px)" pt="90px">
-        <Stack ref={scrollRef} h="100%" overflow="scroll">
-          {messages?.map((message, i) => (
-            <Message key={i} from={message.from} text={message.text} />
-          ))}
-        </Stack>
+        <ClientOnly fallback={<Skeleton />}>
+          <QuestionMessages messages={messages} />
+        </ClientOnly>
       </Box>
       <Box
         w="100%"

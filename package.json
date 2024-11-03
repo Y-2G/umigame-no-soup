@@ -9,22 +9,22 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.8.2",
-    "@emotion/react": "^11.13.0",
-    "@emotion/styled": "^11.13.0",
+    "@chakra-ui/react": "^3.0.2",
+    "@emotion/react": "^11.13.3",
     "@notionhq/client": "^2.2.15",
     "@tanstack/query-sync-storage-persister": "^5.51.21",
     "@tanstack/react-query": "^5.51.23",
     "@tanstack/react-query-persist-client": "^5.51.23",
     "axios": "^1.7.2",
     "firebase": "^10.13.0",
-    "framer-motion": "^11.3.24",
     "init": "^0.1.2",
     "next": "14.2.5",
+    "next-themes": "^0.3.0",
     "npx": "^10.2.2",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.52.1",
+    "react-icons": "^5.3.0",
     "storybook": "^8.2.6"
   },
   "devDependencies": {

@@ -1,42 +1,35 @@
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Question } from "@/types/question";
+import {
+  QuestionType,
+  ChatInputType,
+  ChatMessageFromType,
+  ChatMessageType,
+} from "@/types/question";
 import { BASE_PROMPT, OPEN_AI_API_KEY, OPEN_AI_API_URL } from "@/constants";
 import axios from "axios";
 
-type Inputs = {
-  text: string;
-};
-
-type MessageFrom = "player" | "computer";
-
-type Message = {
-  text: string;
-  from: MessageFrom;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 export const useMessage = () => {
-  const methods = useForm<Inputs>();
+  const methods = useForm<ChatInputType>();
   const queryClient = useQueryClient();
-  const question = queryClient.getQueryData<Question>(["select-quesiton"]);
+  const question = queryClient.getQueryData<QuestionType>(["select-quesiton"]);
 
   const getMessage = async () => {
     const res = await axios.get(`/api/firebase`);
     return res.data;
   };
-  const { data } = useQuery<Message[]>({
+
+  const { data } = useQuery<ChatMessageType[]>({
     queryKey: ["get-messsage"],
     queryFn: getMessage,
   });
 
-  const postMessage = async (data: Message) => {
+  const postMessage = async (data: ChatMessageType) => {
     await axios.post(`/api/firebase`, data);
   };
 
   const mutationMessage = useMutation({
-    mutationFn: async (data: Message) => await postMessage(data),
+    mutationFn: async (data: ChatMessageType) => await postMessage(data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["get-messsage"],
@@ -44,7 +37,7 @@ export const useMessage = () => {
     },
   });
 
-  const storeMessage = async (text: string, from: MessageFrom) => {
+  const storeMessage = async (text: string, from: ChatMessageFromType) => {
     mutationMessage.mutate({
       text,
       from,
@@ -82,12 +75,11 @@ ${text}
     return response.data.choices[0].message.content;
   };
 
-  const onSubmit: SubmitHandler<Inputs> = async ({
+  const onSubmit: SubmitHandler<ChatInputType> = async ({
     text: playerText,
-  }: Inputs) => {
-    if (!playerText) {
-      return;
-    }
+  }: ChatInputType) => {
+    if (!playerText) return;
+
     try {
       await storeMessage(playerText, "player");
       const computerText = await getChatGptMessage(playerText);
@@ -102,6 +94,7 @@ ${text}
     methods,
     messages: data,
     question,
+    isFetching: queryClient.isFetching({ queryKey: ["select-quesiton"] }),
     onSubmit,
   };
 };

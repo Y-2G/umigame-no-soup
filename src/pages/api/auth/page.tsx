@@ -1,5 +1,3 @@
-"use client";
-
 import { useAuth } from "@/hooks/useAuth";
 import { Box, Button, Flex, Stack, Text } from "@chakra-ui/react";
 
