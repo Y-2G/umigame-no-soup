@@ -22,4 +22,4 @@ export const ChatMessages = forwardRef(
   }
 );
 
-ChatMessages.displayName = "QuestionMessages";
+ChatMessages.displayName = "ChatMessages";
