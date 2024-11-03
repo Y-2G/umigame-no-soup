@@ -1,17 +1,12 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Box, Button, Flex, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Center, Stack, Text } from "@chakra-ui/react";
 
 export default function Auth() {
   const { handleAnonymousLogin } = useAuth();
   return (
-    <Flex
-      h="100%"
-      justifyContent="center"
-      alignItems="center"
-      background="gray.100"
-    >
+    <Center h="full" p={10} background="gray.100">
       <Box
-        w={500}
+        w={350}
         p={10}
         rounded="md"
         background="white"
@@ -22,10 +17,10 @@ export default function Auth() {
         alignItems="center"
       >
         <Stack textAlign="center">
-          <Text>匿名でログインできます</Text>
+          <Text>匿名ログイン</Text>
           <Button onClick={handleAnonymousLogin}>Sign in Anonymously</Button>
         </Stack>
       </Box>
-    </Flex>
+    </Center>
   );
 }
