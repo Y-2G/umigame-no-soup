@@ -9,11 +9,9 @@ export type ChatInputType = {
   text: string;
 };
 
-export type ChatMessageFromType = "player" | "computer";
-
 export type ChatMessageType = {
   text: string;
-  from: ChatMessageFromType;
+  from: string;
   createdAt: Date;
   updatedAt: Date;
 };

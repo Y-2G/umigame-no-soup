@@ -1,15 +1,16 @@
-import { QuestionDescription } from "@/components/chat/questionDescription";
 import { ChatMessages } from "@/components/chat/chatMessages";
 import { useMessage } from "@/hooks/useMessage";
 import {
   Box,
   Button,
   Flex,
+  Text,
   Textarea,
   ClientOnly,
   Skeleton,
 } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
+import { DialogActionTrigger, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogRoot, DialogTitle, DialogTrigger } from "#/src/components/ui/dialog";
 
 export default function Chat() {
   const { methods, messages, question, onSubmit } = useMessage();
@@ -32,22 +33,9 @@ export default function Chat() {
 
   return (
     <Box h="100%">
-      <Box
-        w="100%"
-        h="80px"
-        position="fixed"
-        top={0}
-        px={10}
-        py={2}
-        background="#cdcdcd"
-      >
+      <Box>
         <ClientOnly fallback={<Skeleton />}>
-          <QuestionDescription question={question} />
-        </ClientOnly>
-      </Box>
-      <Box h="calc(100% - 80px)" pt="90px">
-        <ClientOnly fallback={<Skeleton />}>
-          <ChatMessages messages={messages} />
+          <ChatMessages question={question} messages={messages} ref={scrollRef} />
         </ClientOnly>
       </Box>
       <Box
@@ -62,7 +50,25 @@ export default function Chat() {
         <form onSubmit={methods.handleSubmit(onSubmit)}>
           <Flex gap={5}>
             <Textarea rows={1} {...methods.register("text")} />
-            <Button type="submit">送信</Button>
+            <DialogRoot placement="center">
+              <DialogTrigger asChild>
+                <Button variant="outline">Q</Button>
+              </DialogTrigger>
+                <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Question</DialogTitle>
+                </DialogHeader>
+                <DialogBody pb="4">
+                  <Text>{question?.description ?? ''}</Text>
+                </DialogBody>
+                <DialogFooter>
+                  <DialogActionTrigger>
+                    <Button>OK</Button>
+                  </DialogActionTrigger>
+                </DialogFooter>
+              </DialogContent>
+            </DialogRoot>
+            <Button type="submit">Submit</Button>
           </Flex>
         </form>
       </Box>

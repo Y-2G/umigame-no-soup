@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { AppProps } from "next/app";
 import { useRouter } from "next/navigation";
+import { ThemeProvider } from "next-themes"
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,10 +34,12 @@ export default function App({ Component, pageProps }: AppProps) {
   }
 
   return (
-    <ChakraProvider>
       <QueryClientProvider client={queryClient}>
-        <Component {...pageProps} />
+        <ChakraProvider>
+          <ThemeProvider attribute="class" disableTransitionOnChange>
+            <Component {...pageProps} />
+          </ThemeProvider>
+        </ChakraProvider>
       </QueryClientProvider>
-    </ChakraProvider>
   );
 }

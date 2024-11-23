@@ -1,9 +1,8 @@
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   QuestionType,
   ChatInputType,
-  ChatMessageFromType,
   ChatMessageType,
 } from "@/types/question";
 import { BASE_PROMPT, OPEN_AI_API_KEY, OPEN_AI_API_URL } from "@/constants";
@@ -11,12 +10,15 @@ import axios from "axios";
 import { db } from "#/firebaseConfig";
 import { query, collection, orderBy, getDocs, onSnapshot } from "firebase/firestore";
 import { useState, useEffect } from "react";
+import { useAuth } from "./useAuth";
 
 export const useMessage = () => {
+  const { user } = useAuth()
   const methods = useForm<ChatInputType>();
   const queryClient = useQueryClient();
   const question = queryClient.getQueryData<QuestionType>(["select-quesiton"]);
 
+  // TODO: tanstackで何とかできないか
   // const getMessage = async () => {
   //   const q = query(collection(db, "message"), orderBy("createdAt"));
   //   const querySnapshot = await getDocs(q);
@@ -56,7 +58,7 @@ export const useMessage = () => {
     },
   });
 
-  const storeMessage = async (text: string, from: ChatMessageFromType) => {
+  const storeMessage = async (text: string, from: string) => {
     mutationMessage.mutate({
       text,
       from,
@@ -100,7 +102,7 @@ ${text}
     if (!playerText) return;
 
     try {
-      await storeMessage(playerText, "player");
+      await storeMessage(playerText, user?.displayName ?? "unknown");
       const computerText = await getChatGptMessage(playerText);
       await storeMessage(computerText, "computer");
     } catch (error) {
